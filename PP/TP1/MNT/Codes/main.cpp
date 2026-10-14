@@ -71,8 +71,25 @@ int main(int argc, char **argv) {
     std::cout << "process  " << pid << " :" << std::endl;
     affichageTerrain(nligne_local, nb_cols, terrain_local-nb_cols);
 
+    int n_loc = nb_lignes / nprocs;
 
-//A Continer
+    int* dir_local = initialisationDirection(n_loc, nb_cols);
+    calculDirection(n_loc, nb_cols, no_value, terrain_local, dir_local);
+
+    int* direction = nullptr;
+    if (pid == root)
+        direction = initialisationDirection(nb_lignes, nb_cols);
+
+    MPI_Gather(dir_local + nb_cols, n_loc * nb_cols, MPI_INT,
+            direction + nb_cols, n_loc * nb_cols, MPI_INT,
+            root, MPI_COMM_WORLD);
+
+    if (pid == root) {
+        std::cout << "Directions :" << std::endl;
+        affichageDirection(nb_lignes, nb_cols, direction);
+        delete[] direction;
+    }
+    delete[] dir_local;
 
 
 
